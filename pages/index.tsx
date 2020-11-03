@@ -282,10 +282,10 @@ const getColumnForDate = (date: Date): ColumnsType<TimetableData> => {
             return aDate.localeCompare(bDate);
           }
           if (aDate) {
-            return 1;
+            return -1;
           }
           if (bDate) {
-            return -1;
+            return 1;
           }
           return 0;
         },
@@ -301,11 +301,11 @@ const columns: ColumnsType<TimetableData> = [
     title: "Group",
     dataIndex: "group",
     filters: data
-      .sort((a, b) => a.group.localeCompare(b.group))
       .map(({ group }) => ({
         text: group,
         value: group,
-      })),
+      }))
+      .sort((a, b) => a.value.localeCompare(b.value)),
     // specify the condition of filtering result
     // here is that finding the name started with `value`
     onFilter: (value, record) => record.group.indexOf(`${value}`) === 0,
