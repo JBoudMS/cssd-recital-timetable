@@ -261,10 +261,12 @@ const getColumnForDate = (date: Date): ColumnsType<TimetableData> => {
       }
       return uniqueTimes;
     }, {});
-  const filters = Object.keys(times).map((time) => ({
-    text: time,
-    value: time,
-  }));
+  const filters = Object.keys(times)
+    .sort((a, b) => a.localeCompare(b))
+    .map((time) => ({
+      text: time,
+      value: time,
+    }));
   return [
     {
       title: date,
@@ -272,19 +274,22 @@ const getColumnForDate = (date: Date): ColumnsType<TimetableData> => {
       filters,
       filterMultiple: true,
       onFilter: (value, record) => record[date]?.indexOf(`${value}`) === 0,
-      sorter: (a, b) => {
-        const aDate = a[date];
-        const bDate = b[date];
-        if (aDate && bDate) {
-          return aDate.localeCompare(bDate);
-        }
-        if (aDate) {
-          return 1;
-        }
-        if (bDate) {
-          return -1;
-        }
-        return 0;
+      sorter: {
+        compare: (a, b) => {
+          const aDate = a[date];
+          const bDate = b[date];
+          if (aDate && bDate) {
+            return aDate.localeCompare(bDate);
+          }
+          if (aDate) {
+            return 1;
+          }
+          if (bDate) {
+            return -1;
+          }
+          return 0;
+        },
+        multiple: 2,
       },
       sortDirections: ["ascend", "descend"],
     },
@@ -295,17 +300,22 @@ const columns: ColumnsType<TimetableData> = [
   {
     title: "Group",
     dataIndex: "group",
-    filters: data.map(({ group }) => ({
-      text: group,
-      value: group,
-    })),
+    filters: data
+      .sort((a, b) => a.group.localeCompare(b.group))
+      .map(({ group }) => ({
+        text: group,
+        value: group,
+      })),
     // specify the condition of filtering result
     // here is that finding the name started with `value`
     onFilter: (value, record) => record.group.indexOf(`${value}`) === 0,
-    sorter: (a, b) => a.group.localeCompare(b.group),
+    sorter: {
+      compare: (a, b) => a.group.localeCompare(b.group),
+      multiple: 1,
+    },
     sortDirections: ["ascend", "descend"],
   },
-  ...getColumnForDate(Date.MONDAY),
+  // ...getColumnForDate(Date.MONDAY),
   ...getColumnForDate(Date.TUESDAY),
   ...getColumnForDate(Date.WEDNESDAY),
   ...getColumnForDate(Date.THURSDAY),
@@ -324,7 +334,7 @@ const App = () => {
       rowClassName={(record, index) =>
         index % 2 === 0 ? "primary" : "secondary"
       }
-      size={"middle"}
+      size={"small"}
       pagination={{
         showSizeChanger: true,
       }}
